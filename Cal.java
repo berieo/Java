@@ -1,3 +1,11 @@
+/*
+    根据Date和Calendar分别获取某年某月的一号是星期几
+    并且得知某年某月最后一天是几号，再使用制表符循环
+    打印出日历，打印的过程需要记录打印到星期几和是否
+    超出最后一天。
+*/
+
+
 import java.util.Calendar;
 import java.util.Date;
 import java.text.*;

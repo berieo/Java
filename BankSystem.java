@@ -1,4 +1,3 @@
-
 /*  
     0、你需要设计BankAccount类去模型化用户银行账户，CashAccount, CreditAccount
     1、账户保存用户名称和余额，精确到分
@@ -7,7 +6,14 @@
     4、系统需要可以发现注册了多少银行账户
     5、对于每一个账户，只有最后6个事务应该能够按升序存储并打印
     6、余额为负数，存款为负数，取的钱大于余额时抛出IllegalArgumentException异常
+
+    用一个BankAccount作为基类，CreditAccount和BookAccount作为子类分别记录信用卡用户和存折用户
+    信用卡用户和存折用户共有的信息存在BankAccount内，特有的信息分别存在子类中，更换用户名和存取
+    的方法在父类中实现，记录银行账户个数采用全局变量，每增加一个初始化类则增加一次，对于账户操作
+    记录在父类中实现，没写进一次则记录一次，记录满六个时更新记录表。对于异常操作在CheckingAccount
+    类中实现，发现异常时抛出异常，并打印异常说明。
 */
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +22,6 @@ public class BankSystem{
     static int account_num = 0;
     // 记录已经登记的用户身份证号
     static String[] idtable = new String[10];
-
     static boolean checkin(String idnumber) {
         List<String> list = Arrays.asList(idtable);
         if (list.contains(idnumber))
@@ -31,6 +36,7 @@ public class BankSystem{
         CheckingAccount check = new CheckingAccount();
         //检查余额是否为负数
         check.checkBalance(account1);
+        //初始化两个类
         System.out.println("----------------------------------------------");
         System.out.println("initital Class BookAccount, Class CreditAccoun");
         System.out.println("----------------------------------------------");
@@ -71,9 +77,6 @@ public class BankSystem{
         System.out.println("----------------------------------------------");
         System.out.println("The amount of account : " + account_num);
         System.out.println("----------------------------------------------");
-        System.out.println("Print the transaction")
-        System.out.println("----------------------------------------------");
-        System.out.println("");
 
     }
     static int numofaccount(){
