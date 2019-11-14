@@ -1,19 +1,20 @@
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-import jdk.internal.jshell.tool.resources.version;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.RandomAccessFile;
+import java.io.*;
 
 /*
+    @author 1713011001-杨昌帅
+
+    @version 1.2.0
+    新增了PIMManager类中Save()和Load()方法，
+        Save()方法用来存储创建的类到文件PIM.txt中
+        Load()方法用来从PIM.txt文件读取内容
+
+    @version 1.1.0
+    新增了PIMCollection类，是通过继承ArraryList<PIMEntity>类实现的
+        PIMCollection包括了四个方法getNotes(),getTodos(),getContacts(),getAppointments(),
+        getItemsForDate(Date d)
+
+    @version 1.0.0
     PIMManager中实现了main,List,Create,Save,Load,Quit方法
         main()中打印欢迎语句，调用打印语句方法
         List()调用toString方法打印ArrayList类中存放的类数组
@@ -35,6 +36,7 @@ import java.io.RandomAccessFile;
 class PIMManager {
     public static void main(String[] args) {
         System.out.println("Welcome to PIM");
+        // system.out.print(PIMCollection.i);
         MainPage mainpage = new MainPage();
         mainpage.mainpage();
     }
@@ -80,13 +82,28 @@ class PIMManager {
     }
 
     // Save the entire list of items
-    void Sava() {
+    void Save() {
         String str = new String();
         int amount = ClassArray.list.size();
         int i;
         for (i = 0; i < amount; i++) {
             str = ClassArray.list.get(i).toString();
-            ClassArray.Write(str);
+        }
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter("PIM.txt", true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw);
+        pw.println(str);
+        pw.flush();
+        try {
+            fw.flush();
+            pw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         System.out.println("Items have been saved.");
     }
@@ -94,7 +111,7 @@ class PIMManager {
     // Read a list of items from a file
     void Load() {
         try {
-            BufferedReader bf = new BufferedReader(new FileReader("C:/Users/ycs19/source/repos/java/src/PIM.txt"));
+            BufferedReader bf = new BufferedReader(new FileReader("PIM.txt"));
             String str;
             while ((str = bf.readLine()) != null) {
                 System.out.println(str);
@@ -103,13 +120,13 @@ class PIMManager {
             System.out.print(e);
         }
     }
-    
-    void Quit(){
+
+    void Quit() {
         System.exit(0);
     }
 }
 
-public interface PIMEntity {
+public abstract class PIMEntity {
 
     // Each PIMEntity needs to be able to set all state infomation
     // (fields) from a single text string.
@@ -121,7 +138,7 @@ public interface PIMEntity {
     abstract public String toString();
 }
 
-class PIMTodo implements PIMEntity {
+class PIMTodo extends PIMEntity {
     static String Priority = "priority";
     String Date;
     String Text;
@@ -167,7 +184,7 @@ class PIMTodo implements PIMEntity {
     }
 }
 
-class PIMNote implements PIMEntity {
+class PIMNote extends PIMEntity {
     static String Priority;
     String Text;
 
@@ -203,13 +220,12 @@ class PIMNote implements PIMEntity {
     }
 
     // method that changes the priority string
-    public static void setPriority(String p) 
-    {
+    public static void setPriority(String p) {
         Priority = p;
     }
 }
 
-class PIMAppointment implements PIMEntity {
+class PIMAppointment extends PIMEntity {
     static String Priority;
     String Date;
     String Description;
@@ -244,13 +260,12 @@ class PIMAppointment implements PIMEntity {
     }
 
     // method that changes the priority string
-    public static void setPriority(String p) 
-    {
+    public static void setPriority(String p) {
         Priority = p;
     }
 }
 
-class PIMContact implements PIMEntity {
+class PIMContact extends PIMEntity {
     static String Priority;
     String FirstName;
     String LastName;
@@ -290,8 +305,7 @@ class PIMContact implements PIMEntity {
     }
 
     // method that changes the priority string
-    public static void setPriority(String p) 
-    {
+    public static void setPriority(String p) {
         Priority = p;
     }
 }
@@ -299,24 +313,9 @@ class PIMContact implements PIMEntity {
 class ClassArray {
     static ArrayList<PIMEntity> list = new ArrayList<PIMEntity>();
     static int i = 0;
+
     public static void Write(String str) {
-        FileWriter fw = null;
-        try {
-            File f = new File("C:/Users/ycs19/source/repos/java/src/PIM.txt");
-            fw = new FileWriter(f, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        PrintWriter pw = new PrintWriter(fw);
-        pw.println(str);
-        pw.flush();
-        try {
-            fw.flush();
-            pw.close();
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        
     }
 }
 
@@ -336,7 +335,7 @@ class MainPage {
             mainpage();
             break;
         case "Save":
-            pimmanager.Sava();
+            pimmanager.Save();
             mainpage();
             break;
         case "Load":
@@ -350,5 +349,61 @@ class MainPage {
             mainpage();
             break;
         }
+    }
+}
+
+public class PIMCollection extends ArraryList<PIMEntity> {
+    public PIMCollection getNotes() {
+        PIMCollection pimnote = new PIMCollection();
+        PIMEntity[] pimentity = this.toArray(new PIMEntity[0]);
+        for (int i = 0; i < this.size(); i++) {
+            pimnote.add(thing[i]);   
+        }
+        return pimnote;
+    }
+
+    public PIMCollection getTodos() {
+        PIMCollection pimtodo = new PIMCollection();
+        PIMEntity[] pimentity = this.toArray(new PIMEntity[0]);
+        for (int i = 0; i < this.size(); i++) {
+            pimtodo.add(pimentity[i]);
+         }
+        return pimtodo; 
+    }
+
+	public PIMCollection getContacts() {
+        PIMCollection pimcontact = new PIMCollection();
+        PIMEntity[] pimentity = this.toArray(new PIMEntity[0]);
+        for (int i = 0; i < this.size(); i++) {
+            pimcontact.add(pimentity[i]);   
+        }
+        return pimcontact;    
+    }
+    
+    public PIMCollection getAppointments() {
+        PIMCollection pimappointment = new PIMCollection();
+        PIMEntity[] pimentity = this.toArray(new PIMEntity[0]);
+        for (int i = 0; i < this.size(); i++) {
+            pimappointment.add(pimentity[i]);      
+        }
+        return pimappointment; 
+    }
+
+	public PIMCollection getItemsForDate(Date d) {
+        PIMCollection pimcollection = new PIMCollection();
+        PIMEntity[] pimentity = this.toArray(new PIMEntity[0]);
+        for (int i = 0; i < this.size(); i++) {
+            if(pimentity[i] instanceof PIMTodo) {
+                PIMTodo pimtodo = (PIMTodo)pimentity[i];
+                if (pimtodo.Date == d)
+                    pimcollection.add(pimentity[i]); 
+            }
+            if(pimentity[i] instanceof PIMAppointment) {
+                PIMAppointment pimappointment = (PIMAppointment)pimentity[i];
+                if (pimappointment.Date == d)
+                    pimcollection.add(pimentity[i]); 
+            }        
+        }
+        return pimcollection;  
     }
 }
